@@ -3,7 +3,7 @@ DEKRYPTIZE
 
 2016-12-19  Markku-Juhani O. Saarinen <mjos@iki.fi>
 
-Dekryptize is a command line ncurses decryption animation to make decryption
+Dekryptize is a command line ncurses animation thing that makes decryption
 look like, well, decryption. The plaintext input is read from standard input --
 or if a filename is supplied, from that file.
 
