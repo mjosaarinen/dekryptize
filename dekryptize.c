@@ -83,6 +83,7 @@ int main(int argc, char **argv)
 	int set[MAXRNDSET];
 	
 	FILE *f = stdin;
+	FILE *tty = fopen("/dev/tty", "r");
 	int status = 0;
 	char lin[256];
 
@@ -96,9 +97,15 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 
 	setlocale(LC_ALL, "");
-
-	if (initscr() == NULL)
-		return 1;
+	if (f==stdin){
+		char* term_type = getenv("TERM");
+		SCREEN* out_screen = newterm(term_type, stdout, tty);
+		set_term(out_screen);
+	} else{
+		initscr();
+	}
+	// if (initscr() == NULL)
+	// 	return 1;
 	cbreak();
 	noecho();
 	nodelay(stdscr, TRUE);
@@ -184,7 +191,7 @@ int main(int argc, char **argv)
 	done = 0;
 	b = 0;
 	while (done < rndset) {
-		if (wgetch(stdscr) != ERR){
+		if (getch() != ERR){
 				status = -1;
 				break;
 		}
