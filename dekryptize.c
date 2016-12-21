@@ -9,6 +9,7 @@
 #include <locale.h>
 #include <ctype.h>
 #include <time.h>
+#include <unistd.h>
 
 #define MAXRNDSET 200
 
@@ -82,6 +83,7 @@ int main(int argc, char **argv)
 	int set[MAXRNDSET];
 	
 	FILE *f = stdin;
+	FILE *tty = fopen("/dev/tty", "r");
 	int status = 0;
 	char lin[256];
 
@@ -95,13 +97,18 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 
 	setlocale(LC_ALL, "");
-
-	if (initscr() == NULL)
-		return 1;
+	if (f==stdin){
+		char* term_type = getenv("TERM");
+		SCREEN* out_screen = newterm(term_type, stdout, tty);
+		set_term(out_screen);
+	} else{
+		initscr();
+	}
+	// if (initscr() == NULL)
+	// 	return 1;
 	cbreak();
 	noecho();
 	nodelay(stdscr, TRUE);
-
 	nonl();
 	intrflush(stdscr, FALSE);
 	keypad(stdscr, TRUE);
@@ -140,9 +147,9 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (f != stdin)
+	if (f != stdin){
 		fclose(f);
-
+	}
 	// randomize initial state
 
 	for (i = 0; i < 6; i++) {
@@ -183,8 +190,11 @@ int main(int argc, char **argv)
 	
 	done = 0;
 	b = 0;
-	while (getch() == ERR && done < rndset) {
-	
+	while (done < rndset) {
+		if (getch() != ERR){
+				status = -1;
+				break;
+		}
 		// animate the set
 	
 		for (i = 0; i < rndset; i++) {
@@ -236,16 +246,20 @@ int main(int argc, char **argv)
 		if (b == 20)
 			b = 0;
 	}
-
 	standout();
-	mvprintw(rows, cols / 2 - 11, " [MESSAGE DECRYPTED] ");
+	if (status != 0){
+		mvprintw(rows, cols / 2 - 24, " [DECRYPTION TERMINATED, PRESS ANY KEY TO EXIT] ");
+	} else {
+		mvprintw(rows, cols / 2 - 11, " [MESSAGE DECRYPTED] ");
+	}
 	standend();
-	refresh();
-
-	nodelay(stdscr, FALSE);
-
-	getch();
-
+	refresh();	
+	// nodelay(stdscr, FALSE);
+	while(1){
+		if (getch() != ERR){
+			break;
+		}
+	}
 	// cleanup
 	endwin();
 	if (buf != NULL)
