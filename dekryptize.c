@@ -81,6 +81,7 @@ int main(int argc, char **argv)
 {
 	int ch, i, x, y, o, n, b, done;
 	int set[MAXRNDSET];
+	SCREEN* out_screen;
 	
 	FILE *f = stdin;
 	FILE *tty = fopen("/dev/tty", "r");
@@ -97,15 +98,14 @@ int main(int argc, char **argv)
 	srand(time(NULL));
 
 	setlocale(LC_ALL, "");
-	if (f==stdin){
-		char* term_type = getenv("TERM");
-		SCREEN* out_screen = newterm(term_type, stdout, tty);
+
+	if (f == stdin){
+		out_screen = newterm(getenv("TERM"), stdout, tty);
 		set_term(out_screen);
 	} else{
 		initscr();
 	}
-	// if (initscr() == NULL)
-	// 	return 1;
+
 	cbreak();
 	noecho();
 	nodelay(stdscr, TRUE);
@@ -116,7 +116,7 @@ int main(int argc, char **argv)
 	// check that it is sane
 	rows = LINES - 1;
 	cols = COLS;
-	if (rows < 8 || cols < 22)
+	if (rows < 8 || cols < 48)
 		return 1;
 	nchr = rows * cols;
 
@@ -150,8 +150,8 @@ int main(int argc, char **argv)
 	if (f != stdin){
 		fclose(f);
 	}
+	
 	// randomize initial state
-
 	for (i = 0; i < 6; i++) {
 
 		for (y = 0; y < rows; y++) {
@@ -191,6 +191,7 @@ int main(int argc, char **argv)
 	done = 0;
 	b = 0;
 	while (done < rndset) {
+	
 		if (getch() != ERR){
 				status = -1;
 				break;
@@ -248,18 +249,19 @@ int main(int argc, char **argv)
 	}
 	standout();
 	if (status != 0){
-		mvprintw(rows, cols / 2 - 24, " [DECRYPTION TERMINATED, PRESS ANY KEY TO EXIT] ");
+		mvprintw(rows, cols / 2 - 24,
+			" [DECRYPTION TERMINATED, PRESS ANY KEY TO EXIT] ");
 	} else {
 		mvprintw(rows, cols / 2 - 11, " [MESSAGE DECRYPTED] ");
 	}
 	standend();
 	refresh();	
-	// nodelay(stdscr, FALSE);
-	while(1){
-		if (getch() != ERR){
-			break;
-		}
+	
+	while (getch() == ERR) {
+		// avoid busy loop
+		usleep(40000);
 	}
+
 	// cleanup
 	endwin();
 	if (buf != NULL)
