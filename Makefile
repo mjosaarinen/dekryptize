@@ -24,3 +24,6 @@ dist:	clean
 	cd ..; \
 	tar cfvJ $(DIST)/$(DIST)-`date -u "+%Y%m%d%H%M"`.txz $(DIST)/*
 
+install:	$(BIN)
+	install $(BIN) /usr/bin
+
