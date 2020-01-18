@@ -16,4 +16,4 @@ requirement from the marketing department.
 Cheers,
 - markku
 
-![](https://mjos.fi/dist/dekryptize.gif)
+![](https://user-images.githubusercontent.com/6192929/72655774-ae433200-398e-11ea-9636-81e19f7e3dab.gif)
