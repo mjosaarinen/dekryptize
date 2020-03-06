@@ -95,7 +95,11 @@ int main(int argc, char **argv)
 		}
 	}
 
-	srand(time(NULL));
+	{
+		unsigned int seed = 0;
+		asm volatile ("rdtsc" : "=A" (seed));
+		srand(seed ^ time(NULL));
+	}
 
 	setlocale(LC_ALL, "");
 
